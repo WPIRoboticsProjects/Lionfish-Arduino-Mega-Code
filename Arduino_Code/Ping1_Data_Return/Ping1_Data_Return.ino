@@ -14,6 +14,9 @@ static Ping1D ping1 { Serial1 };
 // Ping Forward
 static Ping1D ping2 { Serial2 };
 
+// Confidence Threshold
+int Conf_thres = 80; // 80%
+
 static const uint8_t ledPin = 13;
 
 int spearPos = 0; // 0 = retracted, 1 = extended
@@ -49,15 +52,19 @@ void loop()
 {
   
   if (ping1.update()) {
-    sendMsg(0, 1, ping1.distance());
-    ping1.set_ping_enable(0);
-    ping2.set_ping_enable(1);
+    if (ping1.confidence() > conf_thres) {
+      sendMsg(0, 1, ping1.distance());
+      ping1.set_ping_enable(0);
+      ping2.set_ping_enable(1);
+    }
   }
 
   if (ping2.update()) {
-    sendMsg(0, 2, ping2.distance());
-    ping2.set_ping_enable(0);
-    ping1.set_ping_enable(1);
+    if (ping2.confidence() > conf_thres) {
+      sendMsg(0, 2, ping2.distance());
+      ping2.set_ping_enable(0);
+      ping1.set_ping_enable(1);
+    }
   }
 
   getData();
