@@ -15,7 +15,7 @@ static Ping1D ping1 { Serial1 };
 static Ping1D ping2 { Serial2 };
 
 // Confidence Threshold
-int Conf_thres = 80; // 80%
+int conf_thres = 70; // 80%
 
 static const uint8_t ledPin = 13;
 
@@ -39,9 +39,11 @@ void setup()
   pinMode(ledPin, OUTPUT);
   while (!ping1.initialize()) {
     delay(1000);
+    Serial.print("Ping 1 not init");
   }
   while (!ping2.initialize()) {
     delay(1000);
+    Serial.print("Ping 2 not init");
   }
   ping2.set_ping_enable(0);
 }
@@ -52,19 +54,19 @@ void loop()
 {
   
   if (ping1.update()) {
-    if (ping1.confidence() > conf_thres) {
-      sendMsg(0, 1, ping1.distance());
+//    if (ping1.confidence() > conf_thres) {
+      sendMsg(0, 1, ping1.distance(), ping1.confidence());
       ping1.set_ping_enable(0);
       ping2.set_ping_enable(1);
-    }
+//    }
   }
 
   if (ping2.update()) {
-    if (ping2.confidence() > conf_thres) {
-      sendMsg(0, 2, ping2.distance());
+//    if (ping2.confidence() > conf_thres) {
+      sendMsg(0, 2, ping2.distance(), ping2.confidence());
       ping2.set_ping_enable(0);
       ping1.set_ping_enable(1);
-    }
+//    }
   }
 
   getData();
@@ -127,14 +129,16 @@ void parseData() {
 
 }
 
-void sendMsg(int msgType, int id, uint32_t value) {
+void sendMsg(int msgType, int id, uint32_t value, uint16_t value2) {
   Serial.print("<Msg ");
   Serial.print(msgType);
   Serial.print(" ");
   Serial.print(id);
   Serial.print(" ");
-  Serial.println(value);
-  Serial.print(">");
+  Serial.print(value);
+  Serial.print(" ");
+  Serial.print(value2);
+  Serial.println(">");
 }
 
 void sendMsg(int msgType, int id, int value) {
@@ -143,6 +147,6 @@ void sendMsg(int msgType, int id, int value) {
   Serial.print(" ");
   Serial.print(id);
   Serial.print(" ");
-  Serial.println(value);
-  Serial.print(">");
+  Serial.print(value);
+  Serial.println(">");
 }
