@@ -1,4 +1,20 @@
 #include "ping1d.h"
+#include <Servo.h>
+
+// SOS Leak Detector
+int leakPin = 22; // digital pin 22
+int leak = 0;
+
+// ESC Setup
+byte servoPin = 4;  // Spear motor connected as PWM pin 4
+Servo servo;        // Create servo variable
+
+int analogPin1 = A0;  // Battery Voltage Input - PIN 4 to analog pin 0
+int analogPin2 = A1;  // Battery Current Input - PIN 3 to analog pin 1
+int V = 0;            // Raw voltage measurement
+int I = 0;            // Raw current measurement
+int Batt_V = 0;       // Variable to store Battery Voltage
+int Batt_A = 0;       // Variable to store Battery Current
 
 // Ping Down Pins
 static const uint8_t arduinoRxPin1 = 19; //Serial1 rx
@@ -33,6 +49,8 @@ char messageFromPC[buffSize] = {0};
 
 void setup()
 {
+  pinMode(leakPin, INPUT); // Sets leak sensor as digital input
+  
   Serial1.begin(115200);
   Serial2.begin(115200);
   Serial.begin(115200);
@@ -46,12 +64,18 @@ void setup()
     Serial.print("Ping 2 not init");
   }
   ping2.set_ping_enable(0);
+
+  servo.attach(servoPin);        // Attach servo to servo pin 4
+  servo.writeMicroseconds(1500); // Send "stop" signal to ESC
+  delay(1000);                   // Delay to allow the ESC to recognize the stopped signal
 }
 
 
 
 void loop()
 {
+
+
   
   if (ping1.update()) {
 //    if (ping1.confidence() > conf_thres) {
@@ -71,6 +95,10 @@ void loop()
 
   getData();
   updateSpearPos();
+  getBatteryStatus();
+  getLeakStatus();
+
+  
 
   // Toggle the LED to show that the program is running
   digitalWrite(ledPin, !digitalRead(ledPin));
@@ -87,6 +115,33 @@ void updateSpearPos(){
       spearPos = 1;
       sendMsg(1, 0, 1);
     }
+  }
+}
+
+void getBatteryStatus() {
+  // Battery Data
+  V = analogRead(analogPin1);           // Read the battery voltage pin
+  I = analogRead(analogPin2);           // Read the battery current pin
+  Batt_V = V*(5.0/1024)*11.0;           // Convert analog read to actual voltage value
+  Batt_A = (I*(5.0/1024)-0.33)*38.8788; // Convert analog read to actual current value
+
+
+  // If battery voltage drops below threshold, send to Jetson
+  if (Batt_V <= 12.2) {
+    sendMsg(9, 1, Batt_V);          // Send Voltage to return home
+  }
+  else if (Batt_A >= 90){
+    sendMsg(9, 2, Batt_A);          // Send Current to return home
+  }
+  
+}
+
+void getLeakStatus() {
+  // Leak Sensor
+  int leakState = digitalRead(leakPin); // read the input pin
+
+  if (leakState == 1) {            // Sends Leak to Jetson if input pin is high
+    sendMsg(9, 3, 1);              
   }
 }
 
