@@ -2,7 +2,7 @@
 #include <Servo.h>
 
 // SOS Leak Detector
-int leakPin = 22; // digital pin 22
+int leakPin = 31; // digital pin 31
 int leak = 0;
 
 // ESC Setup
