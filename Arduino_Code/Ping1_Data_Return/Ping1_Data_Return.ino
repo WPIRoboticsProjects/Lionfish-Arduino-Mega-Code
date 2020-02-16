@@ -128,10 +128,10 @@ void getBatteryStatus() {
 
   // If battery voltage drops below threshold, send to Jetson
   if (Batt_V <= 12.2) {
-    sendMsg(9, 1, Batt_V);          // Send Voltage to return home
+    sendMsg(2, 1, Batt_V);          // Send Voltage to return home
   }
   else if (Batt_A >= 90){
-    sendMsg(9, 2, Batt_A);          // Send Current to return home
+    sendMsg(2, 2, Batt_A);          // Send Current to return home
   }
   
 }
@@ -141,7 +141,7 @@ void getLeakStatus() {
   int leakState = digitalRead(leakPin); // read the input pin
 
   if (leakState == 1) {            // Sends Leak to Jetson if input pin is high
-    sendMsg(9, 3, 1);              
+    sendMsg(3, 1, 1);              
   }
 }
 
