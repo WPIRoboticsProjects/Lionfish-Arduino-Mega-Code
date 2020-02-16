@@ -127,10 +127,10 @@ void getBatteryStatus() {
 
 
   // If battery voltage drops below threshold, send to Jetson
-  if (Batt_V <= 12.2) {
+  if (Batt_V <= 12.5) {
     sendMsg(2, 1, Batt_V);          // Send Voltage to return home
   }
-  else if (Batt_A >= 90){
+  else if (Batt_A >= 70){
     sendMsg(2, 2, Batt_A);          // Send Current to return home
   }
   
