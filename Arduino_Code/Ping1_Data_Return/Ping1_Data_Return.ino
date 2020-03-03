@@ -181,7 +181,16 @@ void parseData() {
   
   strtokIndx = strtok(inputBuffer,",");
   newSpearPos = atoi(strtokIndx);
-
+  if(newSpearPos == 97){
+    // arm spear
+  }
+  else if(newSpearPos == 100){
+    //disarm spear
+  }
+  else if(newSpearPos == 102){
+    // fire spear
+  }
+      
 }
 
 void sendMsg(int msgType, int id, uint32_t value, uint16_t value2) {
